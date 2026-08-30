@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: mb2
+  profiles:
+    active: dev
+    group:
+      dev:
+        - dev
+        - local
+

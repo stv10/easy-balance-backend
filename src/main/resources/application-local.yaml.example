@@ -1,0 +1,38 @@
+# ==========================================
+# Easy Balance Backend - Local Configuration Example
+# ==========================================
+# Copy this file to src/main/resources/application-local.yaml
+# and replace the placeholders with your actual local configuration.
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mybalance
+    username: postgres
+    password: YOUR_DATABASE_PASSWORD_HERE
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Resend Email Service Configuration
+resend:
+  apiKey: "re_YOUR_RESEND_API_KEY_HERE"
+  toEmail: "your-email@example.com"
+  fromEmail: "onboarding@resend.dev"
+
+# JWT Authentication
+jwt:
+  secret: "YOUR_JWT_SECRET_KEY_HERE_MIN_256_BITS_64_CHARS_LONG"
+  expiration: 86400000
+
+# Default Admin User Credentials (created on first run if DB is empty)
+admin:
+  username: "admin"
+  password: "YOUR_ADMIN_PASSWORD_HERE"
+
+# CORS Configuration
+cors:
+  allowed-origins: "http://localhost:5173"

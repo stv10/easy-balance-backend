@@ -1,0 +1,24 @@
+package stv10.mb2.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import stv10.mb2.dto.DashboardSummaryDTO;
+import stv10.mb2.service.DashboardService;
+
+@RestController
+@RequestMapping("/api/dashboard")
+@RequiredArgsConstructor
+public class DashboardController {
+
+    private final DashboardService service;
+
+    @GetMapping("/summary")
+    public DashboardSummaryDTO getSummary(@RequestParam(required = false) String yearMonth) {
+        return service.getSummary(yearMonth);
+    }
+
+    @PostMapping("/generate")
+    public DashboardSummaryDTO generateMonthlyExpenses(@RequestParam String yearMonth) {
+        return service.generateMonthlyExpenses(yearMonth);
+    }
+}
