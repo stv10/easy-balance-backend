@@ -21,4 +21,9 @@ public class DashboardController {
     public DashboardSummaryDTO generateMonthlyExpenses(@RequestParam String yearMonth) {
         return service.generateMonthlyExpenses(yearMonth);
     }
+
+    @PostMapping("/regenerate")
+    public DashboardSummaryDTO regenerateMonthlyExpenses(@RequestParam String yearMonth) {
+        return service.regenerateMonthlyExpenses(yearMonth);
+    }
 }

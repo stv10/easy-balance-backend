@@ -11,4 +11,5 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID>, JpaSpec
     List<Expense> findByCategory(ExpenseCategory category);
     List<Expense> findByAccountId(UUID accountId);
     List<Expense> findByCreatedAtBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
+    List<Expense> findByFixedExpenseId(UUID fixedExpenseId);
 }

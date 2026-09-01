@@ -36,6 +36,7 @@ public class DashboardService {
   private final FixedExpenseRepository fixedExpenseRepository;
   private final ExpenseRepository expenseRepository;
   private final MonthlyFixedExpenseRepository monthlyFixedExpenseRepository;
+  private final ExpenseService expenseService;
 
   public DashboardSummaryDTO getSummary(String yearMonthStr) {
     YearMonth yearMonth;
@@ -162,6 +163,43 @@ public class DashboardService {
       throw new IllegalStateException("Fixed expenses already generated for month " + yearMonthStr);
     }
 
+    List<FixedExpense> templates = fixedExpenseRepository.findAll();
+    List<MonthlyFixedExpense> instances = templates.stream()
+        .map(t -> MonthlyFixedExpense.builder()
+            .yearMonth(yearMonthStr)
+            .description(t.getDescription())
+            .amount(t.getAmount())
+            .category(t.getCategory())
+            .dueDay(t.getDueDay())
+            .build())
+        .toList();
+
+    monthlyFixedExpenseRepository.saveAll(instances);
+    return getSummary(yearMonthStr);
+  }
+
+  @Transactional
+  public DashboardSummaryDTO regenerateMonthlyExpenses(String yearMonthStr) {
+    try {
+      YearMonth.parse(yearMonthStr);
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Invalid yearMonth format: " + yearMonthStr);
+    }
+
+    List<MonthlyFixedExpense> existingFixedExpenses = monthlyFixedExpenseRepository.findByYearMonth(yearMonthStr);
+
+    // Delete any Expense linked to these monthly fixed expenses (which restores account balance)
+    for (MonthlyFixedExpense fe : existingFixedExpenses) {
+      List<Expense> linkedExpenses = expenseRepository.findByFixedExpenseId(fe.getId());
+      for (Expense exp : linkedExpenses) {
+        expenseService.deleteExpense(exp.getId());
+      }
+    }
+
+    // Delete existing monthly fixed expenses
+    monthlyFixedExpenseRepository.deleteAll(existingFixedExpenses);
+
+    // Re-create from templates
     List<FixedExpense> templates = fixedExpenseRepository.findAll();
     List<MonthlyFixedExpense> instances = templates.stream()
         .map(t -> MonthlyFixedExpense.builder()
