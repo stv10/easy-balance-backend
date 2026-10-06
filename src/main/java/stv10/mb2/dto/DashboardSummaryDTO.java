@@ -16,4 +16,5 @@ public class DashboardSummaryDTO {
     private Map<ExpenseCategory, CategorySummaryDTO> categories;
     private List<MonthlyFixedExpenseDTO> fixedExpenses;
     private boolean generated;
+    private MonthlyBudgetConfigDTO budgetConfig;
 }

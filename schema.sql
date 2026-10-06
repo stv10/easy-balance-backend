@@ -53,3 +53,14 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL
 );
+
+-- 7. Tabla de Configuración Mensual de Presupuesto (MonthlyBudgetConfig)
+CREATE TABLE IF NOT EXISTS monthly_budget_config (
+    id UUID PRIMARY KEY,
+    year_month VARCHAR(255) NOT NULL UNIQUE,
+    total_amount NUMERIC(38, 2) NOT NULL,
+    vida_percentage INTEGER NOT NULL,
+    ocio_percentage INTEGER NOT NULL,
+    inversion_percentage INTEGER NOT NULL
+);
+
