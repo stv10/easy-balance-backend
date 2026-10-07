@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Data;
 import stv10.mb2.model.ExpenseCategory;
 
+import stv10.mb2.model.Tag;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -19,4 +21,5 @@ public class MonthlyFixedExpenseDTO {
     private BigDecimal actualAmount;
     private UUID expenseId;
     private UUID accountId;
+    private Tag tag;
 }

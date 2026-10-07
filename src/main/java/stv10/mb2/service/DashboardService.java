@@ -125,6 +125,7 @@ public class DashboardService {
           .actualAmount(paymentExpenseOpt.map(Expense::getAmount).orElse(null))
           .expenseId(paymentExpenseOpt.map(Expense::getId).orElse(null))
           .accountId(paymentExpenseOpt.map(Expense::getAccountId).orElse(null))
+          .tag(fe.getTag())
           .build());
     }
 
@@ -215,6 +216,7 @@ public class DashboardService {
             .amount(t.getAmount())
             .category(t.getCategory())
             .dueDay(t.getDueDay())
+            .tag(t.getTag())
             .build())
         .toList();
 
@@ -252,6 +254,7 @@ public class DashboardService {
             .amount(t.getAmount())
             .category(t.getCategory())
             .dueDay(t.getDueDay())
+            .tag(t.getTag())
             .build())
         .toList();
 

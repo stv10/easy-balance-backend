@@ -16,6 +16,8 @@ import stv10.mb2.repository.AccountRepository;
 import stv10.mb2.repository.ExpenseRepository;
 import stv10.mb2.strategy.ExpenseSpecificationBuilder;
 
+import stv10.mb2.repository.TagRepository;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -27,11 +29,19 @@ public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final AccountRepository accountRepository;
+    private final TagRepository tagRepository;
     private final ExpenseSpecificationBuilder specificationBuilder;
 
     @Transactional
     public Expense addExpense(Expense expense) {
         expense.setCreatedAt(Optional.ofNullable(expense.getCreatedAt()).orElseGet(LocalDateTime::now));
+
+        if (expense.getTag() != null && expense.getTag().getId() != null) {
+            expense.setTag(tagRepository.findById(expense.getTag().getId()).orElse(null));
+        } else {
+            expense.setTag(null);
+        }
+
         Expense savedExpense = expenseRepository.save(expense);
 
         Optional.ofNullable(expense.getAccountId())

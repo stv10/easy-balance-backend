@@ -17,16 +17,24 @@ CREATE TABLE IF NOT EXISTS budget_config (
     inversion_percentage INTEGER NOT NULL
 );
 
--- 3. Tabla de Gastos Fijos Maestros (FixedExpense)
+-- 3. Tabla de Etiquetas (Tag)
+CREATE TABLE IF NOT EXISTS tag (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    icon VARCHAR(255) NOT NULL DEFAULT 'HelpCircle'
+);
+
+-- 4. Tabla de Gastos Fijos Maestros (FixedExpense)
 CREATE TABLE IF NOT EXISTS fixed_expense (
     id UUID PRIMARY KEY,
     description VARCHAR(255) NOT NULL,
     amount NUMERIC(38, 2) NOT NULL,
     category VARCHAR(255) NOT NULL, -- Valores de Enum: VIDA, OCIO, INVERSION
-    due_day INTEGER NOT NULL
+    due_day INTEGER NOT NULL,
+    tag_id UUID REFERENCES tag(id) ON DELETE SET NULL
 );
 
--- 4. Tabla de Gastos Variables / Registros de Gastos (Expense)
+-- 5. Tabla de Gastos Variables / Registros de Gastos (Expense)
 CREATE TABLE IF NOT EXISTS expense (
     id UUID PRIMARY KEY,
     description VARCHAR(255) NOT NULL,
@@ -34,27 +42,29 @@ CREATE TABLE IF NOT EXISTS expense (
     category VARCHAR(255) NOT NULL, -- Valores de Enum: VIDA, OCIO, INVERSION
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     account_id UUID,
-    fixed_expense_id UUID
+    fixed_expense_id UUID,
+    tag_id UUID REFERENCES tag(id) ON DELETE SET NULL
 );
 
--- 5. Tabla de Historial Mensual de Gastos Fijos (MonthlyFixedExpense)
+-- 6. Tabla de Historial Mensual de Gastos Fijos (MonthlyFixedExpense)
 CREATE TABLE IF NOT EXISTS monthly_fixed_expense (
     id UUID PRIMARY KEY,
     year_month VARCHAR(255) NOT NULL, -- Ej: "2026-08"
     description VARCHAR(255) NOT NULL,
     amount NUMERIC(38, 2) NOT NULL,
     category VARCHAR(255) NOT NULL, -- Valores de Enum: VIDA, OCIO, INVERSION
-    due_day INTEGER NOT NULL
+    due_day INTEGER NOT NULL,
+    tag_id UUID REFERENCES tag(id) ON DELETE SET NULL
 );
 
--- 6. Tabla de Usuarios (users)
+-- 7. Tabla de Usuarios (users)
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL
 );
 
--- 7. Tabla de Configuración Mensual de Presupuesto (MonthlyBudgetConfig)
+-- 8. Tabla de Configuración Mensual de Presupuesto (MonthlyBudgetConfig)
 CREATE TABLE IF NOT EXISTS monthly_budget_config (
     id UUID PRIMARY KEY,
     year_month VARCHAR(255) NOT NULL UNIQUE,

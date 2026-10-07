@@ -25,4 +25,8 @@ public class Expense {
     private UUID accountId;
     
     private UUID fixedExpenseId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "tag_id")
+    private Tag tag;
 }

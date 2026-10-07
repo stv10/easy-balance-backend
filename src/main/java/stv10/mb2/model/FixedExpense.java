@@ -20,4 +20,8 @@ public class FixedExpense {
     private ExpenseCategory category;
     
     private Integer dueDay;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "tag_id")
+    private Tag tag;
 }
