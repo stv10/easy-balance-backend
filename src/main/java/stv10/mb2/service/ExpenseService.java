@@ -22,6 +22,9 @@ import stv10.mb2.dto.MonthlyTagSummaryDTO;
 import stv10.mb2.dto.TagMonthHistoryDTO;
 import stv10.mb2.model.Tag;
 
+import stv10.mb2.dto.CreateExpenseDTO;
+import stv10.mb2.dto.UpdateExpenseDTO;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -45,6 +48,104 @@ public class ExpenseService {
     private final ExpenseSpecificationBuilder specificationBuilder;
 
     private static final UUID UNTAGGED_KEY = new UUID(0L, 0L);
+
+    @Transactional
+    public List<Expense> createExpenses(List<CreateExpenseDTO> dtos) {
+        if (dtos == null || dtos.isEmpty()) {
+            return List.of();
+        }
+
+        List<Expense> expensesToSave = new ArrayList<>();
+
+        for (CreateExpenseDTO dto : dtos) {
+            Expense expense = new Expense();
+            expense.setDescription(dto.description());
+            expense.setAmount(dto.amount() != null ? dto.amount() : BigDecimal.ZERO);
+            expense.setCategory(dto.category());
+            expense.setCreatedAt(Optional.ofNullable(dto.createdAt()).orElseGet(LocalDateTime::now));
+            expense.setAccountId(dto.accountId());
+            expense.setFixedExpenseId(dto.fixedExpenseId());
+
+            if (dto.tagId() != null) {
+                expense.setTag(tagRepository.findById(dto.tagId()).orElse(null));
+            } else {
+                expense.setTag(null);
+            }
+
+            expensesToSave.add(expense);
+
+            if (dto.accountId() != null) {
+                Account account = accountRepository.findById(dto.accountId())
+                        .orElseThrow(() -> new IllegalArgumentException("Account not found: " + dto.accountId()));
+                account.setBalance(account.getBalance().subtract(expense.getAmount()));
+                accountRepository.save(account);
+            }
+        }
+
+        return expenseRepository.saveAll(expensesToSave);
+    }
+
+    @Transactional
+    public List<Expense> updateExpenses(List<UpdateExpenseDTO> dtos) {
+        if (dtos == null || dtos.isEmpty()) {
+            return List.of();
+        }
+
+        List<Expense> updatedExpenses = new ArrayList<>();
+
+        for (UpdateExpenseDTO dto : dtos) {
+            Expense expense = expenseRepository.findById(dto.id())
+                    .orElseThrow(() -> new IllegalArgumentException("Expense not found: " + dto.id()));
+
+            BigDecimal oldAmount = expense.getAmount() != null ? expense.getAmount() : BigDecimal.ZERO;
+            UUID oldAccountId = expense.getAccountId();
+
+            BigDecimal newAmount = dto.amount() != null ? dto.amount() : BigDecimal.ZERO;
+            UUID newAccountId = dto.accountId();
+
+            if (oldAccountId != null && oldAccountId.equals(newAccountId)) {
+                BigDecimal difference = newAmount.subtract(oldAmount);
+                if (difference.compareTo(BigDecimal.ZERO) != 0) {
+                    Account account = accountRepository.findById(oldAccountId)
+                            .orElseThrow(() -> new IllegalArgumentException("Account not found: " + oldAccountId));
+                    account.setBalance(account.getBalance().subtract(difference));
+                    accountRepository.save(account);
+                }
+            } else {
+                if (oldAccountId != null) {
+                    Account oldAccount = accountRepository.findById(oldAccountId)
+                            .orElseThrow(() -> new IllegalArgumentException("Account not found: " + oldAccountId));
+                    oldAccount.setBalance(oldAccount.getBalance().add(oldAmount));
+                    accountRepository.save(oldAccount);
+                }
+                if (newAccountId != null) {
+                    Account newAccount = accountRepository.findById(newAccountId)
+                            .orElseThrow(() -> new IllegalArgumentException("Account not found: " + newAccountId));
+                    newAccount.setBalance(newAccount.getBalance().subtract(newAmount));
+                    accountRepository.save(newAccount);
+                }
+            }
+
+            expense.setDescription(dto.description());
+            expense.setAmount(newAmount);
+            expense.setCategory(dto.category());
+            if (dto.createdAt() != null) {
+                expense.setCreatedAt(dto.createdAt());
+            }
+            expense.setAccountId(newAccountId);
+            expense.setFixedExpenseId(dto.fixedExpenseId());
+
+            if (dto.tagId() != null) {
+                expense.setTag(tagRepository.findById(dto.tagId()).orElse(null));
+            } else {
+                expense.setTag(null);
+            }
+
+            updatedExpenses.add(expense);
+        }
+
+        return expenseRepository.saveAll(updatedExpenses);
+    }
 
     @Transactional
     public Expense addExpense(Expense expense) {

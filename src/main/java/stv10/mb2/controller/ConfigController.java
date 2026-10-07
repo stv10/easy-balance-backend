@@ -2,6 +2,7 @@ package stv10.mb2.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import stv10.mb2.dto.UpdateBudgetConfigDTO;
 import stv10.mb2.model.BudgetConfig;
 import stv10.mb2.repository.BudgetConfigRepository;
 
@@ -20,10 +21,14 @@ public class ConfigController {
     }
 
     @PutMapping
-    public BudgetConfig updateConfig(@RequestBody BudgetConfig config) {
-        repository.findAll().stream()
+    public BudgetConfig updateConfig(@RequestBody UpdateBudgetConfigDTO dto) {
+        BudgetConfig config = repository.findAll().stream()
                 .findFirst()
-                .ifPresent(existing -> config.setId(existing.getId()));
+                .orElseGet(BudgetConfig::new);
+        config.setTotalAmount(dto.totalAmount());
+        config.setVidaPercentage(dto.vidaPercentage());
+        config.setOcioPercentage(dto.ocioPercentage());
+        config.setInversionPercentage(dto.inversionPercentage());
         return repository.save(config);
     }
 }

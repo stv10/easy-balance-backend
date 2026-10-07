@@ -133,4 +133,79 @@ class ExpenseServiceTest {
         assertEquals(foodTag, e2.getTag());
         verify(expenseRepository).saveAll(any());
     }
+
+    @Test
+    void createExpenses_SavesExpensesAndDeductsAccountBalance() {
+        UUID accountId = UUID.randomUUID();
+        stv10.mb2.model.Account account = new stv10.mb2.model.Account();
+        account.setId(accountId);
+        account.setBalance(new BigDecimal("1000.00"));
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(tagRepository.findById(foodTagId)).thenReturn(Optional.of(foodTag));
+        when(expenseRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        stv10.mb2.dto.CreateExpenseDTO dto = new stv10.mb2.dto.CreateExpenseDTO(
+                "Supermercado",
+                new BigDecimal("250.00"),
+                ExpenseCategory.VIDA,
+                LocalDateTime.now(),
+                accountId,
+                foodTagId,
+                null
+        );
+
+        List<Expense> saved = expenseService.createExpenses(List.of(dto));
+
+        assertEquals(1, saved.size());
+        assertEquals("Supermercado", saved.get(0).getDescription());
+        assertEquals(new BigDecimal("750.00"), account.getBalance());
+        verify(accountRepository).save(account);
+        verify(expenseRepository).saveAll(any());
+    }
+
+    @Test
+    void updateExpenses_RebalancesAccountBalanceCorrectly() {
+        UUID oldAccountId = UUID.randomUUID();
+        stv10.mb2.model.Account oldAccount = new stv10.mb2.model.Account();
+        oldAccount.setId(oldAccountId);
+        oldAccount.setBalance(new BigDecimal("500.00"));
+
+        UUID newAccountId = UUID.randomUUID();
+        stv10.mb2.model.Account newAccount = new stv10.mb2.model.Account();
+        newAccount.setId(newAccountId);
+        newAccount.setBalance(new BigDecimal("1000.00"));
+
+        UUID expenseId = UUID.randomUUID();
+        Expense existingExpense = new Expense();
+        existingExpense.setId(expenseId);
+        existingExpense.setDescription("Old Description");
+        existingExpense.setAmount(new BigDecimal("100.00"));
+        existingExpense.setAccountId(oldAccountId);
+
+        when(expenseRepository.findById(expenseId)).thenReturn(Optional.of(existingExpense));
+        when(accountRepository.findById(oldAccountId)).thenReturn(Optional.of(oldAccount));
+        when(accountRepository.findById(newAccountId)).thenReturn(Optional.of(newAccount));
+        when(expenseRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        stv10.mb2.dto.UpdateExpenseDTO updateDto = new stv10.mb2.dto.UpdateExpenseDTO(
+                expenseId,
+                "New Description",
+                new BigDecimal("150.00"),
+                ExpenseCategory.OCIO,
+                LocalDateTime.now(),
+                newAccountId,
+                null,
+                null
+        );
+
+        List<Expense> updated = expenseService.updateExpenses(List.of(updateDto));
+
+        assertEquals(1, updated.size());
+        assertEquals("New Description", updated.get(0).getDescription());
+        assertEquals(new BigDecimal("600.00"), oldAccount.getBalance()); // Reverted old 100
+        assertEquals(new BigDecimal("850.00"), newAccount.getBalance()); // Deducted new 150
+        verify(accountRepository).save(oldAccount);
+        verify(accountRepository).save(newAccount);
+    }
 }

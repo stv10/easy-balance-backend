@@ -3,6 +3,8 @@ package stv10.mb2.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import stv10.mb2.dto.CreateTagDTO;
+import stv10.mb2.dto.UpdateTagDTO;
 import stv10.mb2.model.Tag;
 import stv10.mb2.service.TagService;
 
@@ -23,12 +25,12 @@ public class TagController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Tag createTag(@RequestBody Tag tag) {
+    public Tag createTag(@RequestBody CreateTagDTO tag) {
         return tagService.createTag(tag);
     }
 
     @PutMapping("/{id}")
-    public Tag updateTag(@PathVariable UUID id, @RequestBody Tag tag) {
+    public Tag updateTag(@PathVariable UUID id, @RequestBody UpdateTagDTO tag) {
         return tagService.updateTag(id, tag);
     }
 

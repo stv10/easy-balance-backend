@@ -2,9 +2,10 @@ package stv10.mb2.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import stv10.mb2.dto.CreateFixedExpenseDTO;
+import stv10.mb2.dto.UpdateFixedExpenseDTO;
 import stv10.mb2.model.FixedExpense;
 import stv10.mb2.repository.FixedExpenseRepository;
-
 import stv10.mb2.repository.TagRepository;
 
 import java.util.List;
@@ -24,24 +25,34 @@ public class FixedExpenseController {
     }
 
     @PostMapping
-    public FixedExpense addFixedExpense(@RequestBody FixedExpense fixedExpense) {
-        resolveTag(fixedExpense);
+    public FixedExpense addFixedExpense(@RequestBody CreateFixedExpenseDTO dto) {
+        FixedExpense fixedExpense = new FixedExpense();
+        fixedExpense.setDescription(dto.description());
+        fixedExpense.setAmount(dto.amount());
+        fixedExpense.setCategory(dto.category());
+        fixedExpense.setDueDay(dto.dueDay());
+        if (dto.tagId() != null) {
+            fixedExpense.setTag(tagRepository.findById(dto.tagId()).orElse(null));
+        } else {
+            fixedExpense.setTag(null);
+        }
         return repository.save(fixedExpense);
     }
 
     @PutMapping("/{id}")
-    public FixedExpense updateFixedExpense(@PathVariable UUID id, @RequestBody FixedExpense fixedExpense) {
-        fixedExpense.setId(id);
-        resolveTag(fixedExpense);
-        return repository.save(fixedExpense);
-    }
-
-    private void resolveTag(FixedExpense fixedExpense) {
-        if (fixedExpense.getTag() != null && fixedExpense.getTag().getId() != null) {
-            fixedExpense.setTag(tagRepository.findById(fixedExpense.getTag().getId()).orElse(null));
+    public FixedExpense updateFixedExpense(@PathVariable UUID id, @RequestBody UpdateFixedExpenseDTO dto) {
+        FixedExpense fixedExpense = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Fixed expense not found: " + id));
+        fixedExpense.setDescription(dto.description());
+        fixedExpense.setAmount(dto.amount());
+        fixedExpense.setCategory(dto.category());
+        fixedExpense.setDueDay(dto.dueDay());
+        if (dto.tagId() != null) {
+            fixedExpense.setTag(tagRepository.findById(dto.tagId()).orElse(null));
         } else {
             fixedExpense.setTag(null);
         }
+        return repository.save(fixedExpense);
     }
 
     @DeleteMapping("/{id}")

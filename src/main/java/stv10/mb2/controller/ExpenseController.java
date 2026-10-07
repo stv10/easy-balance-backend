@@ -3,10 +3,12 @@ package stv10.mb2.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import stv10.mb2.dto.BulkUpdateExpenseTagRequest;
+import stv10.mb2.dto.CreateExpenseDTO;
 import stv10.mb2.dto.MonthlyExpensesAnalyticsDTO;
 import stv10.mb2.dto.SSPRequest;
 import stv10.mb2.dto.SSPResponse;
 import stv10.mb2.dto.TagMonthHistoryDTO;
+import stv10.mb2.dto.UpdateExpenseDTO;
 import stv10.mb2.dto.UpdateExpenseTagRequest;
 import stv10.mb2.model.Expense;
 import stv10.mb2.service.ExpenseService;
@@ -27,8 +29,13 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public Expense addExpense(@RequestBody Expense expense) {
-        return service.addExpense(expense);
+    public List<Expense> createExpenses(@RequestBody List<CreateExpenseDTO> dtos) {
+        return service.createExpenses(dtos);
+    }
+
+    @PutMapping
+    public List<Expense> updateExpenses(@RequestBody List<UpdateExpenseDTO> dtos) {
+        return service.updateExpenses(dtos);
     }
 
     @PostMapping("/ssp")

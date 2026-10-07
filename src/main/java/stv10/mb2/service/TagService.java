@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import stv10.mb2.dto.CreateTagDTO;
+import stv10.mb2.dto.UpdateTagDTO;
 import stv10.mb2.model.Tag;
 import stv10.mb2.repository.ExpenseRepository;
 import stv10.mb2.repository.FixedExpenseRepository;
@@ -29,6 +31,24 @@ public class TagService {
 
     public Optional<Tag> getTagById(UUID id) {
         return tagRepository.findById(id);
+    }
+
+    @Transactional
+    public Tag createTag(CreateTagDTO dto) {
+        return createTag(Tag.builder()
+                .name(dto.name())
+                .icon(dto.icon())
+                .color(dto.color())
+                .build());
+    }
+
+    @Transactional
+    public Tag updateTag(UUID id, UpdateTagDTO dto) {
+        return updateTag(id, Tag.builder()
+                .name(dto.name())
+                .icon(dto.icon())
+                .color(dto.color())
+                .build());
     }
 
     @Transactional
