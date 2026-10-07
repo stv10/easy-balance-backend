@@ -46,6 +46,11 @@ public class TagService {
         } else {
             tag.setIcon(tag.getIcon().trim());
         }
+        if (tag.getColor() == null || tag.getColor().trim().isEmpty()) {
+            tag.setColor("#3b82f6");
+        } else {
+            tag.setColor(tag.getColor().trim());
+        }
         return tagRepository.save(tag);
     }
 
@@ -69,6 +74,9 @@ public class TagService {
             tag.setIcon("HelpCircle");
         } else {
             tag.setIcon(tagDetails.getIcon().trim());
+        }
+        if (tagDetails.getColor() != null && !tagDetails.getColor().trim().isEmpty()) {
+            tag.setColor(tagDetails.getColor().trim());
         }
         return tagRepository.save(tag);
     }

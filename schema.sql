@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS budget_config (
 CREATE TABLE IF NOT EXISTS tag (
     id UUID PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
-    icon VARCHAR(255) NOT NULL DEFAULT 'HelpCircle'
+    icon VARCHAR(255) NOT NULL DEFAULT 'HelpCircle',
+    color VARCHAR(50) NOT NULL DEFAULT '#3b82f6'
 );
 
 -- 4. Tabla de Gastos Fijos Maestros (FixedExpense)

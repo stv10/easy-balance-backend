@@ -25,4 +25,8 @@ public class Tag {
     @Column(nullable = false)
     @Builder.Default
     private String icon = "HelpCircle";
+
+    @Column
+    @Builder.Default
+    private String color = "#3b82f6";
 }
